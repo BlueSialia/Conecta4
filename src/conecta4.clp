@@ -42,7 +42,6 @@
   )
   (assert (tablero (valor (create$ $?tab))))
   
-  (printout t "Las posibles conexiones son:" crlf)
   (loop-for-count (?f 1 ?*fila*) do
     (loop-for-count (?c 1 ?*columna*) do
       (if (<= (- ?f 1) (- ?*fila* ?*fichas*)) then
@@ -52,7 +51,6 @@
           (bind $?conexion_vertical_arriba (insert$ $?conexion_vertical_arriba (+ (length$ $?conexion_vertical_arriba) 1) ?coordenadas))
         )
         (bind ?*posibles_conexiones* (insert$ ?*posibles_conexiones* (+ (length$ ?*posibles_conexiones*) 1) (implode$ ?conexion_vertical_arriba)))
-        (printout t ?conexion_vertical_arriba crlf)
       )
       (if (<= (- ?c 1) (- ?*columna* ?*fichas*)) then
         (bind ?conexion_horizontal_derecha (create$))
@@ -61,7 +59,6 @@
           (bind $?conexion_horizontal_derecha (insert$ $?conexion_horizontal_derecha (+ (length$ $?conexion_horizontal_derecha) 1) ?coordenadas))
         )
         (bind ?*posibles_conexiones* (insert$ ?*posibles_conexiones* (+ (length$ ?*posibles_conexiones*) 1) (implode$ ?conexion_horizontal_derecha)))
-        (printout t ?conexion_horizontal_derecha crlf)
       )
       (if (and (<= (- ?f 1) (- ?*fila* ?*fichas*)) (<= (- ?c 1) (- ?*columna* ?*fichas*))) then
         (bind ?conexion_diagonal_arriba_derecha (create$))
@@ -70,7 +67,6 @@
           (bind $?conexion_diagonal_arriba_derecha (insert$ $?conexion_diagonal_arriba_derecha (+ (length$ $?conexion_diagonal_arriba_derecha) 1) ?coordenadas))
         )
         (bind ?*posibles_conexiones* (insert$ ?*posibles_conexiones* (+ (length$ ?*posibles_conexiones*) 1) (implode$ ?conexion_diagonal_arriba_derecha)))
-        (printout t ?conexion_diagonal_arriba_derecha crlf)
       )
       (if (and (<= (- ?f 1) (- ?*fila* ?*fichas*)) (>= ?c ?*fichas*)) then
         (bind ?conexion_diagonal_arriba_izquierda (create$))
@@ -79,11 +75,9 @@
           (bind $?conexion_diagonal_arriba_izquierda (insert$ $?conexion_diagonal_arriba_izquierda (+ (length$ $?conexion_diagonal_arriba_izquierda) 1) ?coordenadas))
         )
         (bind ?*posibles_conexiones* (insert$ ?*posibles_conexiones* (+ (length$ ?*posibles_conexiones*) 1) (implode$ ?conexion_diagonal_arriba_izquierda)))
-        (printout t ?conexion_diagonal_arriba_izquierda crlf)
       )
     )
   )
-  (printout t ?*posibles_conexiones* crlf)
 )
 
 (defrule dibuja-tablero
