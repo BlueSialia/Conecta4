@@ -164,7 +164,7 @@
   ;(assert (mostrar-tablero))
 )
 
-(deffunction heuristico(?valor) ;valor es un array de filas y las filas son srings.
+(deffunction heuristico(?valor ?simbolo) ;valor es un array de filas y las filas son srings.
   (bind ?conexiones-x 0)
   (bind ?conexiones-o 0)
   (progn$ (?con ?*posibles_conexiones*)
@@ -188,7 +188,11 @@
         (if ?hayp then
           (bind ?conexiones-x (+ ?conexiones-x 1))
         else
-          (return 1000000)
+          (if (eq ?simbolo x) then
+            (return 1000000)
+          else
+            (return -1000000)
+          )
         )
       )
     else
@@ -196,7 +200,11 @@
         (if ?hayp then
           (bind ?conexiones-o (+ ?conexiones-o 1))
         else
-          (return -1000000)
+          (if (eq ?simbolo x) then
+            (return -1000000)
+          else
+            (return 1000000)
+          )
         )
       else
         (bind ?conexiones-x (+ ?conexiones-x 1))
@@ -204,5 +212,9 @@
       )
     )
   )
-  (return (- ?conexiones-x ?conexiones-o))
+  (if (eq ?simbolo x) then
+    (return (- ?conexiones-x ?conexiones-o))
+  else
+    (return (- ?conexiones-o ?conexiones-x))
+  )
 )
