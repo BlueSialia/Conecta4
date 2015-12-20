@@ -6,6 +6,7 @@
 (defglobal ?*fila* = 3)
 (defglobal ?*columna* = 3)
 (defglobal ?*fichas* = 2)
+(defglobal ?*posibles_conexiones* = (create$))
 
 (deftemplate tablero
   (slot jugador (allowed-values max min))
@@ -38,10 +39,45 @@
     
   (loop-for-count (?i 1 ?*fila*)
     (bind $?tab (insert$ $?tab 1 $?filastrin))
-  (bind ?kaka 1)
   )
   (assert (tablero (valor (create$ $?tab))))
   
+  (loop-for-count (?f 1 ?*fila*) do
+    (loop-for-count (?c 1 ?*columna*) do
+      (if (<= (+ ?f 1) (- ?*fila* ?*fichas*)) then
+        (bind ?conexion_vertical_arriba (create$))
+        (loop-for-count (?n 0 (- ?*fichas* 1)) do
+          (bind ?coordenadas (create$ ?c (+ ?f ?n)))
+          (bind $?conexion_vertical_arriba (insert$ $?conexion_vertical_arriba (+ (length$ $?conexion_vertical_arriba) 1) ?coordenadas))
+        )
+        (bind ?*posibles_conexiones* (insert$ ?*posibles_conexiones* (+ (length$ ?*posibles_conexiones*) 1) ?conexion_vertical_arriba))
+      )
+      (if (<= (+ ?c 1) (- ?*columna* ?*fichas*)) then
+        (bind ?conexion_horizontal_derecha (create$))
+        (loop-for-count (?n 0 (- ?*fichas* 1)) do
+          (bind ?coordenadas (create$ (+ ?c ?n) ?f))
+          (bind $?conexion_horizontal_derecha (insert$ $?conexion_horizontal_derecha (+ (length$ $?conexion_horizontal_derecha) 1) ?coordenadas))
+        )
+        (bind ?*posibles_conexiones* (insert$ ?*posibles_conexiones* (+ (length$ ?*posibles_conexiones*) 1) ?conexion_horizontal_derecha))
+      )
+      (if (and (<= (+ ?f 1) (- ?*fila* ?*fichas*)) (<= (+ ?c 1) (- ?*columna* ?*fichas*))) then
+        (bind ?conexion_diagonal_arriba_derecha (create$))
+        (loop-for-count (?n 0 (- ?*fichas* 1)) do
+          (bind ?coordenadas (create$ (+ ?c ?n) (+ ?f ?n)))
+          (bind $?conexion_diagonal_arriba_derecha (insert$ $?conexion_diagonal_arriba_derecha (+ (length$ $?conexion_diagonal_arriba_derecha) 1) ?coordenadas))
+        )
+        (bind ?*posibles_conexiones* (insert$ ?*posibles_conexiones* (+ (length$ ?*posibles_conexiones*) 1) ?conexion_diagonal_arriba_derecha))
+      )
+      (if (and (<= (+ ?f 1) (- ?*fila* ?*fichas*)) (>= ?c ?*fichas*)) then
+        (bind ?conexion_diagonal_arriba_izquierda (create$))
+        (loop-for-count (?n 0 (- ?*fichas* 1)) do
+          (bind ?coordenadas (create$ (- ?c ?n) (+ ?f ?n)))
+          (bind $?conexion_diagonal_arriba_izquierda (insert$ $?conexion_diagonal_arriba_izquierda (+ (length$ $?conexion_diagonal_arriba_izquierda) 1) ?coordenadas))
+        )
+        (bind ?*posibles_conexiones* (insert$ ?*posibles_conexiones* (+ (length$ ?*posibles_conexiones*) 1) ?conexion_diagonal_arriba_izquierda))
+      )
+    )
+  )
 )
 
 (defrule dibuja-tablero
@@ -120,4 +156,46 @@
   =>
   (assert (ficha-jugador x j2))
   ;(assert (mostrar-tablero))
+)
+
+(deffunction heuristico(?valor) ;valor es un array de columnas (y las columnas son arrays)
+  (bind ?conexiones-x 0)
+  (bind ?conexiones-o 0)
+  (progn$ ?conexion ?*posibles-conexiones*
+    (bind ?hayx FALSE)
+    (bind ?hayo FALSE)
+    (bind ?hayp FALSE)
+    (progn$ ?posicion ?conexion
+      (if (eq (nth$ (nth$ 2 ?posicion) (nth$ (nth$ 1 ?posicion) ?valor)) x) then
+        (bind ?hayx TRUE)
+      )
+      (if (eq (nth$ (nth$ 2 ?posicion) (nth$ (nth$ 1 ?posicion) ?valor)) o) then
+        (bind ?hayo TRUE)
+      )
+      (if (eq (nth$ (nth$ 2 ?posicion) (nth$ (nth$ 1 ?posicion) ?valor)) .) then
+        (bind ?hayp TRUE)
+      )
+    )
+    (if ?hayx then
+      (if (not ?hayo) then
+        (if ?hayp then
+          (bind ?conexiones-x (+ ?conexiones-x 1))
+        else
+          (return 1000000)
+        )
+      )
+    else
+      (if ?hayo then
+        (if ?hayp then
+          (bind ?conexiones-o (+ ?conexiones-o 1))
+        else
+          (return -1000000)
+        )
+      else
+        (bind ?conexiones-x (+ ?conexiones-x 1))
+        (bind ?conexiones-o (+ ?conexiones-o 1))
+      )
+    )
+  )
+  (return (- ?hayx ?hayo))
 )
