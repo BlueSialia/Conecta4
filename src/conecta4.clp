@@ -161,11 +161,11 @@
 (deffunction heuristico(?valor) ;valor es un array de columnas (y las columnas son arrays)
   (bind ?conexiones-x 0)
   (bind ?conexiones-o 0)
-  (progn$ ?conexion ?*posibles-conexiones*
+  (progn$ (?conexion ?*posibles_conexiones*)
     (bind ?hayx FALSE)
     (bind ?hayo FALSE)
     (bind ?hayp FALSE)
-    (progn$ ?posicion ?conexion
+    (progn$ (?posicion ?conexion)
       (if (eq (nth$ (nth$ 2 ?posicion) (nth$ (nth$ 1 ?posicion) ?valor)) x) then
         (bind ?hayx TRUE)
       )
